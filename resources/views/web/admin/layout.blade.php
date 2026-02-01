@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
@@ -71,7 +71,7 @@
         }
     </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+<body class="h-full bg-slate-50 bg-[url('/images/hc-background-light-pattern.png')] bg-repeat bg-[length:200px_200px] bg-fixed text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
 
 <div class="flex min-h-screen overflow-hidden">
     <div id="adminOverlay" class="fixed inset-0 z-40 hidden bg-slate-900/60 backdrop-blur-sm transition-opacity lg:hidden"></div>

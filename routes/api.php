@@ -3,13 +3,22 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CategoriesController;
+use App\Http\Controllers\Api\V1\CheckoutController;
 use App\Http\Controllers\Api\V1\ListingsController;
 use App\Http\Controllers\Api\V1\LocationsController;
+use App\Http\Controllers\Api\V1\OrdersController;
+use App\Http\Controllers\Api\V1\OrdersTrackingController;
+use App\Http\Controllers\Api\V1\PaystackController;
+use App\Http\Controllers\Api\V1\PaystackWebhookController;
 use App\Http\Controllers\Api\V1\SavedListingsController;
+use App\Http\Controllers\Api\V1\ListingReviewEligibilityController;
+use App\Http\Controllers\Api\V1\ListingReviewsController;
+use App\Http\Controllers\Api\V1\ReviewsController;
 use App\Http\Controllers\Api\V1\Admin\ListingsController as AdminListingsController;
+use App\Http\Controllers\Api\V1\Admin\OrderStatusController as AdminOrderStatusController;
+use App\Http\Controllers\Api\V1\Admin\OrderTrackingController as AdminOrderTrackingController;
 use App\Http\Controllers\GoogleAuthController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Session\Middleware\StartSession;
 
 Route::prefix('v1')->group(function () {
     Route::get('/health', function () {
@@ -23,6 +32,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/listings', [ListingsController::class, 'index']);
     Route::get('/listings/{slug}', [ListingsController::class, 'show']);
+    Route::get('/listings/{listing}/reviews', [ListingReviewsController::class, 'index']);
 
     Route::get('/categories', [CategoriesController::class, 'index']);
     Route::get('/categories/{categorySlug}/subcategories', [CategoriesController::class, 'subCategories']);
@@ -30,13 +40,29 @@ Route::prefix('v1')->group(function () {
     Route::get('/locations/states', [LocationsController::class, 'states']);
     Route::get('/locations/states/{stateSlug}/cities', [LocationsController::class, 'cities']);
 
-    Route::middleware([StartSession::class])->group(function () {
+    Route::middleware(['web'])->group(function () {
         Route::get('/cart', [CartController::class, 'show']);
         Route::post('/cart/items', [CartController::class, 'storeItem']);
         Route::patch('/cart/items/{id}', [CartController::class, 'updateItem']);
         Route::delete('/cart/items/{id}', [CartController::class, 'destroyItem']);
         Route::delete('/cart/clear', [CartController::class, 'clear']);
+
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::get('/checkout/summary', [CheckoutController::class, 'summary']);
+
+            Route::get('/orders', [OrdersController::class, 'index']);
+            Route::get('/orders/{order}', [OrdersController::class, 'show']);
+            Route::get('/orders/{order}/tracking', [OrdersTrackingController::class, 'show']);
+
+            Route::post('/paystack/initialize', [PaystackController::class, 'initialize']);
+            Route::post('/paystack/verify', [PaystackController::class, 'verify']);
+
+            Route::get('/listings/{listing}/review-eligibility', [ListingReviewEligibilityController::class, 'show']);
+            Route::post('/reviews', [ReviewsController::class, 'store']);
+        });
     });
+
+    Route::post('/paystack/webhook', [PaystackWebhookController::class, 'handle']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -52,6 +78,9 @@ Route::prefix('v1')->group(function () {
             Route::delete('/listings/{listing}', [AdminListingsController::class, 'destroy']);
             Route::post('/listings/{listing}/images', [AdminListingsController::class, 'uploadImages']);
             Route::patch('/listings/{listing}/status', [AdminListingsController::class, 'updateStatus']);
+
+            Route::post('/orders/{order}/tracking', [AdminOrderTrackingController::class, 'store']);
+            Route::patch('/orders/{order}/status', [AdminOrderStatusController::class, 'update']);
         });
     });
 });

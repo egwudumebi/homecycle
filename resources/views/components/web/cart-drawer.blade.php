@@ -81,17 +81,17 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-3 flex items-center justify-between gap-3">
+                                <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div class="inline-flex items-center rounded-2xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-950">
                                         <button type="button" class="grid h-8 w-8 place-items-center rounded-xl text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:text-slate-200 dark:hover:bg-slate-900" :disabled="!window.hcCart || window.hcCart.isPending(`item:${item.id}`)" @click="window.hcCart && window.hcCart.setQty(item.id, Math.max(0, (item.quantity || 1) - 1))">−</button>
                                         <div class="grid h-8 min-w-[40px] place-items-center text-xs font-black text-slate-900 dark:text-slate-100" x-text="item.quantity"></div>
                                         <button type="button" class="grid h-8 w-8 place-items-center rounded-xl text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:text-slate-200 dark:hover:bg-slate-900" :disabled="!window.hcCart || window.hcCart.isPending(`item:${item.id}`)" @click="window.hcCart && window.hcCart.setQty(item.id, (item.quantity || 1) + 1)">+</button>
                                     </div>
 
-                                    <div class="flex items-center gap-3">
-                                        <div class="text-xs font-black text-slate-900 dark:text-slate-100">₦<span x-text="window.hcCart ? window.hcCart.formatMoney((Number(item.price_at_time || 0) * Number(item.quantity || 0))) : ''"></span></div>
+                                    <div class="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start">
+                                        <div class="text-xs font-black text-slate-900 dark:text-slate-100 whitespace-nowrap">₦<span x-text="window.hcCart ? window.hcCart.formatMoney((Number(item.price_at_time || 0) * Number(item.quantity || 0))) : ''"></span></div>
 
-                                        <button type="button" class="rounded-2xl px-2 py-2 text-xs font-black text-slate-400 hover:text-red-500 disabled:opacity-40" :disabled="!window.hcCart || window.hcCart.isPending(`item:${item.id}`)" @click="window.hcCart && window.hcCart.remove(item.id)">
+                                        <button type="button" class="rounded-2xl px-2 py-2 text-xs font-black text-slate-400 hover:text-red-500 disabled:opacity-40 whitespace-nowrap shrink-0" :disabled="!window.hcCart || window.hcCart.isPending(`item:${item.id}`)" @click="window.hcCart && window.hcCart.remove(item.id)">
                                             <span x-show="!window.hcCart || !window.hcCart.isPending(`item:${item.id}`)">Remove</span>
                                             <span x-show="window.hcCart && window.hcCart.isPending(`item:${item.id}`)">Working…</span>
                                         </button>

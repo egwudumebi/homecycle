@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
@@ -91,7 +91,7 @@
     darkMode: (window.__hcTheme?.getPreferredTheme?.() ?? localStorage.getItem('theme')) === 'dark'
 }" 
 x-init="window.addEventListener('scroll', () => scrolled = window.scrollY > 20)"
-class="min-h-screen font-sans bg-[#fbfcfd] text-slate-900 selection:bg-indigo-100 selection:text-indigo-700 dark:bg-[#020617] dark:text-slate-100 transition-colors duration-300">
+class="min-h-screen font-sans bg-[#fbfcfd] bg-[url('/images/hc-background-light-pattern.png')] bg-repeat bg-[length:200px_200px] bg-fixed text-slate-900 selection:bg-indigo-100 selection:text-indigo-700 dark:bg-[#020617] dark:text-slate-100 transition-colors duration-300">
 
     <div class="fixed top-4 right-4 z-[70] space-y-2" x-data>
         <template x-for="t in ($store.hcCart ? ($store.hcCart.toasts || []) : [])" :key="t.id">
@@ -147,22 +147,46 @@ class="min-h-screen font-sans bg-[#fbfcfd] text-slate-900 selection:bg-indigo-10
                     @endguest
 
                     @auth
-                        <a href="{{ route('auth.google.redirect', ['select_account' => 1, 'return_url' => url()->full()]) }}" title="Switch Google account" class="flex items-center gap-2 rounded-2xl bg-white border border-slate-200 shadow-sm p-1.5 sm:px-2 sm:py-1.5 dark:bg-slate-900 dark:border-slate-800">
-                            @if(!empty(auth()->user()->avatar))
-                                <img
-                                    src="{{ auth()->user()->avatar }}"
-                                    alt="{{ auth()->user()->name }}"
-                                    class="h-8 w-8 rounded-xl object-cover"
-                                    referrerpolicy="no-referrer"
-                                />
-                            @else
-                                <div class="h-8 w-8 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
-                            @endif
-                            <div class="hidden sm:block max-w-[140px] truncate text-sm font-bold text-slate-700 dark:text-slate-200">
-                                {{ auth()->user()->name }}
+                        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                            <button type="button" title="Account" @click="open = !open" class="flex items-center gap-2 rounded-2xl bg-white border border-slate-200 shadow-sm p-1.5 sm:px-2 sm:py-1.5 dark:bg-slate-900 dark:border-slate-800">
+                                @if(!empty(auth()->user()->avatar))
+                                    <img
+                                        src="{{ auth()->user()->avatar }}"
+                                        alt="{{ auth()->user()->name }}"
+                                        class="h-8 w-8 rounded-xl object-cover"
+                                        referrerpolicy="no-referrer"
+                                    />
+                                @else
+                                    <div class="h-8 w-8 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
+                                @endif
+                                <div class="hidden sm:block max-w-[140px] truncate text-sm font-bold text-slate-700 dark:text-slate-200">
+                                    {{ auth()->user()->name }}
+                                </div>
+                                <svg class="hidden sm:block h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <div x-cloak x-show="open" x-transition class="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
+                                <a href="{{ route('auth.google.redirect', ['select_account' => 1, 'return_url' => url()->full()]) }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-900">
+                                    <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    Switch account
+                                </a>
+
+                                <form method="POST" action="{{ route('web.logout') }}" class="border-t border-slate-100 dark:border-slate-800">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/30">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+                                        Logout
+                                    </button>
+                                </form>
                             </div>
-                        </a>
+                        </div>
                     @endauth
+
+                    <a href="{{ route('web.orders.index') }}" data-auth-intent="orders" class="relative group p-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-600 hover:border-indigo-500 hover:text-indigo-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:text-indigo-400 transition-all" title="My Orders">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-6-8h6M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </a>
 
                     @if(Route::has('web.saved.index'))
                         <a href="{{ route('web.saved.index') }}" class="relative group p-2.5 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-600 hover:border-indigo-500 hover:text-indigo-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:text-indigo-400 transition-all">
@@ -181,7 +205,7 @@ class="min-h-screen font-sans bg-[#fbfcfd] text-slate-900 selection:bg-indigo-10
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white/80 backdrop-blur-sm rounded-3xl shadow-sm shadow-slate-900/5 dark:bg-transparent dark:backdrop-blur-0 dark:shadow-none">
         @yield('content')
     </main>
 
@@ -233,5 +257,6 @@ class="min-h-screen font-sans bg-[#fbfcfd] text-slate-900 selection:bg-indigo-10
 
     <script src="{{ url('js/auth.js') }}" defer></script>
     <script src="{{ url('js/cart.js') }}" defer></script>
+    @stack('scripts')
 </body>
 </html>

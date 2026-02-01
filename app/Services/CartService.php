@@ -70,9 +70,13 @@ class CartService
     {
         $user = $this->resolveUser($request);
 
-        return $user
-            ? $this->getDbCartPayload($user)
-            : $this->getSessionCartPayload($request);
+        if ($user) {
+            $this->mergeSessionIntoUserCart($request, $user);
+
+            return $this->getDbCartPayload($user);
+        }
+
+        return $this->getSessionCartPayload($request);
     }
 
     public function addItem(Request $request, int $listingId, int $quantity = 1): array

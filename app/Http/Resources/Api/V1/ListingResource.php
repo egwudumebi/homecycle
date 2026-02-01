@@ -5,6 +5,7 @@ namespace App\Http\Resources\Api\V1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class ListingResource extends JsonResource
 {
@@ -19,6 +20,8 @@ class ListingResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'price' => $this->price,
+            'avg_rating' => (float) ($this->avg_rating ?? 0),
+            'reviews_count' => (int) ($this->reviews_count ?? 0),
             'status' => $this->status,
             'is_featured' => (bool) $this->is_featured,
             'created_at' => optional($this->created_at)->toISOString(),
@@ -49,7 +52,7 @@ class ListingResource extends JsonResource
                 ];
             }),
             'image' => $firstImage ? [
-                'url' => Storage::disk($firstImage->disk)->url($firstImage->path),
+                'url' => URL::to(Storage::disk($firstImage->disk)->url($firstImage->path)),
             ] : null,
         ];
     }

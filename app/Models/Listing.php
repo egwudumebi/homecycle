@@ -22,6 +22,8 @@ class Listing extends Model
         'status',
         'is_featured',
         'published_at',
+        'avg_rating',
+        'reviews_count',
     ];
 
     protected function casts(): array
@@ -30,6 +32,8 @@ class Listing extends Model
             'price' => 'decimal:2',
             'is_featured' => 'boolean',
             'published_at' => 'datetime',
+            'avg_rating' => 'decimal:2',
+            'reviews_count' => 'integer',
         ];
     }
 
@@ -56,5 +60,10 @@ class Listing extends Model
     public function savedByUsers(): HasMany
     {
         return $this->hasMany(SavedListing::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 }

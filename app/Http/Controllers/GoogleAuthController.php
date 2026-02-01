@@ -77,6 +77,16 @@ class GoogleAuthController extends Controller
         return redirect()->to(route('web.home'));
     }
 
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->to(route('web.home'));
+    }
+
     public function apiRedirect(Request $request): Response
     {
         $redirect = Socialite::driver('google')

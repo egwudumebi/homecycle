@@ -16,6 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'api/v1/cart*',
+            'api/v1/checkout*',
+            'api/v1/orders*',
+            'api/v1/paystack*',
+        ]);
+
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'setLocale' => SetLocale::class,
