@@ -23,40 +23,37 @@
     </script>
 
     @php
-        $hasBuild = file_exists(public_path('build/manifest.json'))
+        $hasViteHot = file_exists(public_path('hot'));
+        $hasViteBuild = file_exists(public_path('build/manifest.json'))
             && is_dir(public_path('build/assets'))
             && count(glob(public_path('build/assets/*'))) > 0;
     @endphp
-    @if($hasBuild)
+    @if($hasViteHot || $hasViteBuild)
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
         <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-            (() => {
-                const root = document.documentElement;
-                const getPreferredTheme = () => {
-                    const stored = window.localStorage.getItem('theme');
-                    if (stored === 'light' || stored === 'dark') return stored;
-                    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                };
-                const applyTheme = (theme) => {
+    @endif
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const root = document.documentElement;
+            const apply = (theme) => {
+                if (window.__hcTheme?.applyTheme) window.__hcTheme.applyTheme(theme);
+                else {
                     if (theme === 'dark') root.classList.add('dark');
                     else root.classList.remove('dark');
                     window.localStorage.setItem('theme', theme);
-                };
-                window.__hcTheme = { getPreferredTheme, applyTheme };
-                applyTheme(getPreferredTheme());
-                window.addEventListener('DOMContentLoaded', () => {
-                    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
-                        btn.addEventListener('click', () => {
-                            const next = root.classList.contains('dark') ? 'light' : 'dark';
-                            (window.__hcTheme?.applyTheme ? window.__hcTheme.applyTheme(next) : applyTheme(next));
-                        });
-                    });
+                }
+            };
+
+            document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const next = root.classList.contains('dark') ? 'light' : 'dark';
+                    apply(next);
                 });
-            })();
-        </script>
-    @endif
+            });
+        });
+    </script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -66,8 +63,12 @@
         .nav-link-inactive:hover { background-color: rgb(248 250 252); color: rgb(15 23 42); }
 
         @media (max-width: 1023px) {
-            .sidebar-closed { transform: translateX(-100%); }
-            .sidebar-open { transform: translateX(0); }
+            #adminDrawer[data-state="closed"] { transform: translateX(-100%); }
+            #adminDrawer[data-state="open"] { transform: translateX(0); }
+        }
+
+        @media (min-width: 1024px) {
+            #adminDrawer { transform: none !important; }
         }
     </style>
 </head>
@@ -76,7 +77,7 @@
 <div class="flex min-h-screen overflow-hidden">
     <div id="adminOverlay" class="fixed inset-0 z-40 hidden bg-slate-900/60 backdrop-blur-sm transition-opacity lg:hidden"></div>
 
-    <aside id="adminDrawer" class="sidebar-closed fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform duration-300 ease-in-out lg:static lg:flex lg:transform-none">
+    <aside id="adminDrawer" data-state="closed" class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform duration-300 ease-in-out lg:static lg:flex lg:transform-none">
         <div class="flex h-16 items-center justify-between border-b border-slate-100 px-6">
             <a href="{{ route('admin.overview') }}" class="flex items-center gap-3">
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-200">
@@ -103,6 +104,7 @@
                         $navItems = [
                             ['route' => 'admin.overview', 'label' => 'Overview', 'icon' => 'M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 12a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z'],
                             ['route' => 'admin.products', 'label' => 'Products', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+                            ['route' => 'admin.catalogue.categories.index', 'label' => 'Catalogue', 'icon' => 'M4 6h16M4 10h16M4 14h10M4 18h10', 'match' => ['admin.catalogue.categories.*', 'admin.catalogue.subcategories.*']],
                             ['route' => 'admin.sales', 'label' => 'Sales', 'icon' => 'M7 12l3-3 3 2 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z'],
                             ['route' => 'admin.orders', 'label' => 'Orders', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
                             ['route' => 'admin.deliveries', 'label' => 'Logistics', 'icon' => 'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8h4l3 3V16a1 1 0 01-1 1h-1'],
@@ -110,9 +112,12 @@
                     @endphp
 
                     @foreach($navItems as $item)
+                    @php
+                        $isActive = request()->routeIs($item['route']) || (isset($item['match']) && request()->routeIs(...$item['match']));
+                    @endphp
                     <a href="{{ route($item['route']) }}" 
-                       class="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {{ request()->routeIs($item['route']) ? 'nav-link-active' : 'nav-link-inactive' }}">
-                        <svg class="h-5 w-5 {{ request()->routeIs($item['route']) ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                       class="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all {{ $isActive ? 'nav-link-active' : 'nav-link-inactive' }}">
+                        <svg class="h-5 w-5 {{ $isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                         </svg>
                         {{ $item['label'] }}
@@ -190,21 +195,36 @@
 </div>
 
 <script>
+    if (!window.__hcAdminDrawerBound) {
     const adminMenuBtn = document.getElementById('adminMenuBtn');
     const closeDrawerBtn = document.getElementById('closeDrawerBtn');
     const adminDrawer = document.getElementById('adminDrawer');
     const adminOverlay = document.getElementById('adminOverlay');
 
+    window.__hcAdminDrawerBound = true;
+
+    const toggleDrawer = (forceClose = false) => {
+        if (!adminDrawer || !adminOverlay) return;
+        const isOpen = adminDrawer.getAttribute('data-state') === 'open';
+        const shouldClose = forceClose || isOpen;
+
+        if (shouldClose) {
+            adminDrawer.setAttribute('data-state', 'closed');
+            adminOverlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        } else {
+            adminDrawer.setAttribute('data-state', 'open');
+            adminOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
     function openMenu() {
-        adminDrawer.classList.replace('sidebar-closed', 'sidebar-open');
-        adminOverlay.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; 
+        toggleDrawer(false);
     }
 
     function closeMenu() {
-        adminDrawer.classList.replace('sidebar-open', 'sidebar-closed');
-        adminOverlay.classList.add('hidden');
-        document.body.style.overflow = ''; 
+        toggleDrawer(true);
     }
 
     adminMenuBtn.addEventListener('click', openMenu);
@@ -216,6 +236,13 @@
             if (window.innerWidth < 1024) closeMenu();
         });
     });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && adminDrawer.getAttribute('data-state') === 'open') {
+            closeMenu();
+        }
+    });
+    }
 </script>
 </body>
 </html>

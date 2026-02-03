@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Web\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Web\Admin\Catalogue\CategoriesController as AdminCategoriesController;
+use App\Http\Controllers\Web\Admin\Catalogue\SubCategoriesController as AdminSubCategoriesController;
 use App\Http\Controllers\Web\Admin\DashboardController;
 use App\Http\Controllers\Web\Admin\LocationProxyController;
 use App\Http\Controllers\Web\Admin\ListingsController as AdminListingsController;
@@ -65,6 +67,12 @@ Route::middleware(['setLocale'])->group(function () {
             Route::get('/listings/{id}/edit', [AdminListingsController::class, 'edit'])->name('admin.listings.edit');
             Route::post('/listings/{id}', [AdminListingsController::class, 'update'])->name('admin.listings.update');
             Route::post('/listings/{id}/status', [AdminListingsController::class, 'updateStatus'])->name('admin.listings.status');
+
+            Route::get('/catalogue/categories', [AdminCategoriesController::class, 'index'])->name('admin.catalogue.categories.index');
+            Route::get('/catalogue/categories/{category}', [AdminCategoriesController::class, 'show'])->name('admin.catalogue.categories.show');
+
+            Route::get('/catalogue/subcategories', [AdminSubCategoriesController::class, 'index'])->name('admin.catalogue.subcategories.index');
+            Route::get('/catalogue/subcategories/{subCategory}', [AdminSubCategoriesController::class, 'show'])->name('admin.catalogue.subcategories.show');
         });
     });
 });

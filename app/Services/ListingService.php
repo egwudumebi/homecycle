@@ -60,6 +60,33 @@ class ListingService
 
         $query = Listing::query()->with(['images', 'subCategory.category', 'state', 'city']);
 
+        if ($request->filled('category_id')) {
+            $categoryId = (int) $request->input('category_id');
+            if ($categoryId > 0) {
+                $query->whereHas('subCategory', function (Builder $q1) use ($categoryId) {
+                    $q1->where('category_id', $categoryId);
+                });
+            }
+        }
+
+        if ($request->filled('sub_category_id')) {
+            $subCategoryId = (int) $request->input('sub_category_id');
+            if ($subCategoryId > 0) {
+                $query->where('sub_category_id', $subCategoryId);
+            }
+        }
+
+        if ($request->filled('status')) {
+            $status = strtolower(trim((string) $request->string('status')));
+            if (in_array($status, ['active', 'sold', 'hidden'], true)) {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($request->boolean('featured')) {
+            $query->where('is_featured', true);
+        }
+
         if ($request->filled('q')) {
             $q = trim((string) $request->string('q'));
             $query->where(function (Builder $q1) use ($q) {

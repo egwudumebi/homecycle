@@ -27,10 +27,10 @@
             align-items: center;
             justify-content: center;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+            background-color: #fbfcfd;
+            background-image: url('{{ asset('images/hc-background-light-pattern.png') }}');
+            background-repeat: repeat;
+            background-size: 200px 200px;
             padding: 20px;
         }
 
@@ -105,6 +105,12 @@
             box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         }
 
+        input.error {
+            background: #fff;
+            border-color: #ef4444;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+        }
+
         .password-wrapper {
             position: relative;
         }
@@ -171,6 +177,42 @@
             margin-top: 6px;
             margin-left: 4px;
         }
+
+        .alert-error {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            background: rgba(254, 242, 242, 0.9);
+            color: #991b1b;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin: 0 0 18px;
+        }
+
+        .alert-error .icon {
+            flex: 0 0 auto;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(239, 68, 68, 0.12);
+        }
+
+        .alert-error .title {
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+
+        .alert-error .msg {
+            margin-top: 2px;
+            font-size: 13px;
+            color: #b91c1c;
+        }
     </style>
 </head>
 <body>
@@ -187,9 +229,21 @@
     <form method="POST" action="{{ route('admin.login.submit') }}">
         @csrf
 
+        @if($errors->any())
+            <div class="alert-error" role="alert">
+                <span class="icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                </span>
+                <div>
+                    <div class="title">Sign in failed</div>
+                    <div class="msg">{{ $errors->first() }}</div>
+                </div>
+            </div>
+        @endif
+
         <div class="form-group">
             <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="admin@homecycle.com" required autocomplete="username">
+            <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="admin@homecycle.com" required autocomplete="username" class="@error('email') error @enderror">
             @error('email')
                 <div class="error-msg">{{ $message }}</div>
             @enderror
@@ -198,7 +252,7 @@
         <div class="form-group">
             <label for="hcAdminPassword">Password</label>
             <div class="password-wrapper">
-                <input type="password" id="hcAdminPassword" name="password" placeholder="••••••••" required autocomplete="current-password">
+                <input type="password" id="hcAdminPassword" name="password" placeholder="••••••••" required autocomplete="current-password" class="@error('password') error @enderror">
                 <button type="button" id="hcAdminPwToggle" class="toggle-pw" aria-label="Toggle password visibility">
                     <svg class="icon-show" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     <svg class="icon-hide" style="display:none" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a10.056 10.056 0 012.602-4.192M9.88 9.88A3 3 0 0114.12 14.12M6.228 6.228L3 3m3.228 3.228l14.544 14.544M21 21l-3.228-3.228M17.772 17.772A10.057 10.057 0 0021.543 12c-1.274-4.057-5.065-7-9.543-7-1.01 0-1.99.149-2.915.427"/></svg>

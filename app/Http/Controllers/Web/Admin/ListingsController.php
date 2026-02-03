@@ -33,7 +33,7 @@ class ListingsController extends Controller
         $categories = CategoryResource::collection($categoryService->getActiveWithSubCategories())->resolve($request);
         $states = LocationStateResource::collection($locationService->getStates())->resolve($request);
 
-        return view('web.admin.listings.create_single', [
+        return view('web.admin.listings.create', [
             'apiUser' => $request->session()->get('api_user'),
             'categories' => $categories,
             'states' => $states,
@@ -73,7 +73,7 @@ class ListingsController extends Controller
         $categories = CategoryResource::collection($categoryService->getActiveWithSubCategories())->resolve($request);
         $states = LocationStateResource::collection($locationService->getStates())->resolve($request);
 
-        return view('web.admin.listings.edit_single', [
+        return view('web.admin.listings.edit', [
             'apiUser' => $request->session()->get('api_user'),
             'listingId' => $id,
             'listing' => $detail,
