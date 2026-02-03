@@ -44,6 +44,12 @@
         .thumbs{display:flex;gap:8px;overflow-x:auto;padding:0 10px 10px}
         .thumb{height:72px;width:72px;flex:0 0 auto;border-radius:14px;object-fit:cover;display:block}
         @media(min-width:640px){.thumbs{display:none}}
+        .img-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.78);z-index:1000}
+        .img-modal.show{display:flex}
+        .img-modal-inner{position:relative;width:min(100%,980px)}
+        .img-modal-img{width:100%;max-height:86vh;object-fit:contain;border-radius:18px;display:block;background:#0b1220}
+        .img-modal-close{position:absolute;top:10px;right:10px;height:42px;width:42px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(2,6,23,.55);color:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+        .img-modal-close:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
         .fallback{display:flex;align-items:center;justify-content:center;height:260px;color:var(--muted)}
         .section{margin-top:16px}
         .section h3{margin:0;font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase}
@@ -59,7 +65,38 @@
     </style>
     <script>
         (()=>{const stored=localStorage.getItem('theme');const theme=stored==='light'||stored==='dark'?stored:(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');if(theme==='dark')document.documentElement.classList.add('dark');})();
-        window.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.addEventListener('click',()=>{const root=document.documentElement;const next=root.classList.contains('dark')?'light':'dark';if(next==='dark')root.classList.add('dark');else root.classList.remove('dark');localStorage.setItem('theme',next);});});});
+        window.addEventListener('DOMContentLoaded',()=>{
+            document.querySelectorAll('[data-theme-toggle]').forEach(btn=>{btn.addEventListener('click',()=>{const root=document.documentElement;const next=root.classList.contains('dark')?'light':'dark';if(next==='dark')root.classList.add('dark');else root.classList.remove('dark');localStorage.setItem('theme',next);});});
+
+            const modal = document.getElementById('hcImagePreview');
+            const modalImg = modal ? modal.querySelector('[data-preview-img]') : null;
+            const closeBtn = modal ? modal.querySelector('[data-preview-close]') : null;
+
+            const openPreview = (src) => {
+                if (!modal || !modalImg || !src) return;
+                modalImg.setAttribute('src', src);
+                modal.classList.add('show');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closePreview = () => {
+                if (!modal || !modalImg) return;
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+                modalImg.setAttribute('src', '');
+                document.body.style.overflow = '';
+            };
+
+            document.querySelectorAll('[data-img-preview]').forEach((img) => {
+                img.style.cursor = 'zoom-in';
+                img.addEventListener('click', () => openPreview(img.getAttribute('src')));
+            });
+
+            if (closeBtn) closeBtn.addEventListener('click', () => closePreview());
+            if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closePreview(); });
+            window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
+        });
     </script>
 </head>
 <body>
@@ -96,19 +133,19 @@
                     @if(count($images) > 0)
                         <div class="grid-photos">
                             <div class="ph-main">
-                                <img class="ph" src="{{ $images[0]['url'] }}" alt="{{ $listing['title'] ?? '' }}" />
+                                <img class="ph" data-img-preview src="{{ $images[0]['url'] }}" alt="{{ $listing['title'] ?? '' }}" />
                             </div>
                             @if(isset($images[1]))
-                                <div class="ph-small one"><img class="ph" src="{{ $images[1]['url'] }}" alt="" /></div>
+                                <div class="ph-small one"><img class="ph" data-img-preview src="{{ $images[1]['url'] }}" alt="" /></div>
                             @endif
                             @if(isset($images[2]))
-                                <div class="ph-small two"><img class="ph" src="{{ $images[2]['url'] }}" alt="" /></div>
+                                <div class="ph-small two"><img class="ph" data-img-preview src="{{ $images[2]['url'] }}" alt="" /></div>
                             @endif
                         </div>
                         @if(count($images) > 1)
                             <div class="thumbs">
                                 @foreach($images as $img)
-                                    <img class="thumb" src="{{ $img['url'] }}" alt="" />
+                                    <img class="thumb" data-img-preview src="{{ $img['url'] }}" alt="" />
                                 @endforeach
                             </div>
                         @endif
@@ -203,5 +240,14 @@
             </aside>
         </div>
 </main>
+
+<div id="hcImagePreview" class="img-modal" aria-hidden="true">
+    <div class="img-modal-inner">
+        <button type="button" class="img-modal-close" data-preview-close aria-label="Close preview">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6"/><path d="M6 6l12 12"/></svg>
+        </button>
+        <img class="img-modal-img" data-preview-img alt="" />
+    </div>
+</div>
 </body>
 </html>
