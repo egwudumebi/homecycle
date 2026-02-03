@@ -41,6 +41,9 @@
         .ph{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
         .ph-main:hover .ph{transform:scale(1.03)}
         .ph-small:hover .ph{transform:scale(1.03)}
+        .thumbs{display:flex;gap:8px;overflow-x:auto;padding:0 10px 10px}
+        .thumb{height:72px;width:72px;flex:0 0 auto;border-radius:14px;object-fit:cover;display:block}
+        @media(min-width:640px){.thumbs{display:none}}
         .fallback{display:flex;align-items:center;justify-content:center;height:260px;color:var(--muted)}
         .section{margin-top:16px}
         .section h3{margin:0;font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase}
@@ -102,6 +105,13 @@
                                 <div class="ph-small two"><img class="ph" src="{{ $images[2]['url'] }}" alt="" /></div>
                             @endif
                         </div>
+                        @if(count($images) > 1)
+                            <div class="thumbs">
+                                @foreach($images as $img)
+                                    <img class="thumb" src="{{ $img['url'] }}" alt="" />
+                                @endforeach
+                            </div>
+                        @endif
                     @else
                         <div class="fallback">No images available</div>
                     @endif

@@ -9,6 +9,30 @@ use Illuminate\Support\Facades\URL;
 
 class ListingDetailResource extends JsonResource
 {
+    private function imageUrl(?string $disk, string $path): string
+    {
+        $disk = $disk ?: 'public';
+
+        $raw = Storage::disk($disk)->url($path);
+
+        if (is_string($raw) && filter_var($raw, FILTER_VALIDATE_URL)) {
+            $parsed = parse_url($raw);
+            $rebased = (string) ($parsed['path'] ?? '');
+
+            if (isset($parsed['query']) && $parsed['query'] !== '') {
+                $rebased .= '?'.$parsed['query'];
+            }
+
+            if (isset($parsed['fragment']) && $parsed['fragment'] !== '') {
+                $rebased .= '#'.$parsed['fragment'];
+            }
+
+            return URL::to($rebased);
+        }
+
+        return URL::to($raw);
+    }
+
     public function toArray(Request $request): array
     {
         $storeName = (string) config('app.store.name');
@@ -65,7 +89,7 @@ class ListingDetailResource extends JsonResource
             'images' => $this->whenLoaded('images', function () {
                 return $this->images->map(fn ($img) => [
                     'id' => $img->id,
-                    'url' => URL::to(Storage::disk($img->disk)->url($img->path)),
+                    'url' => $this->imageUrl($img->disk ?? null, (string) $img->path),
                     'sort_order' => $img->sort_order,
                 ]);
             }, []),

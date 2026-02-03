@@ -28,17 +28,30 @@
                     @endphp
                     
                     @if(count($images) > 0)
-                        <div class="grid grid-cols-4 grid-rows-2 gap-2 p-2 h-[300px] sm:h-[450px]">
+                        <div class="sm:hidden">
+                            <div class="p-2">
+                                <img src="{{ $images[0]['url'] }}" class="h-[300px] w-full rounded-2xl object-cover" alt="{{ $listing['title'] }}" />
+                            </div>
+                            @if(count($images) > 1)
+                                <div class="flex gap-2 overflow-x-auto px-2 pb-2">
+                                    @foreach($images as $img)
+                                        <img src="{{ $img['url'] }}" class="h-20 w-20 flex-none rounded-2xl object-cover" alt="" />
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="hidden sm:grid grid-cols-4 grid-rows-2 gap-2 p-2 h-[300px] sm:h-[450px]">
                             <div class="col-span-4 row-span-2 sm:col-span-3 sm:row-span-2 overflow-hidden rounded-2xl">
                                 <img src="{{ $images[0]['url'] }}" class="h-full w-full object-cover transition hover:scale-105 duration-500" alt="{{ $listing['title'] }}" />
                             </div>
                             @foreach(array_slice($images, 1, 2) as $img)
-                                <div class="hidden sm:block col-span-1 row-span-1 overflow-hidden rounded-2xl">
+                                <div class="col-span-1 row-span-1 overflow-hidden rounded-2xl">
                                     <img src="{{ $img['url'] }}" class="h-full w-full object-cover transition hover:scale-105" alt="" />
                                 </div>
                             @endforeach
                             @if(count($images) > 3)
-                                <div class="hidden sm:flex relative col-span-1 row-span-1 overflow-hidden rounded-2xl items-center justify-center bg-slate-900 dark:bg-slate-800">
+                                <div class="flex relative col-span-1 row-span-1 overflow-hidden rounded-2xl items-center justify-center bg-slate-900 dark:bg-slate-800">
                                     <img src="{{ $images[3]['url'] }}" class="absolute inset-0 h-full w-full object-cover opacity-40" alt="" />
                                     <span class="relative z-10 text-sm font-bold text-white">+{{ count($images) - 3 }} more</span>
                                 </div>
